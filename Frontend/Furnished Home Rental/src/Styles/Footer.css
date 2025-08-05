@@ -1,0 +1,10 @@
+footer a {
+  color: #007bff;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+footer a:hover {
+  color: pink; /* Change color to pink on hover */
+  text-decoration: underline;
+}

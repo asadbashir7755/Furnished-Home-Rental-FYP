@@ -1,0 +1,45 @@
+.price-form {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  margin: 0;
+  padding: 20px;
+}
+
+.price-form h3 {
+  font-weight: bold;
+  color: #333;
+}
+
+.price-form .form-item {
+  margin-bottom: 16px;
+}
+
+.price-form .form-item label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.price-form .ant-input {
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.price-form .ant-input:focus {
+  border-color: #1890ff;
+  box-shadow: 0 0 5px rgba(24, 144, 255, 0.2);
+}
+
+.price-form .ant-input::placeholder {
+  color: #999;
+}
+
+@media (max-width: 768px) {
+  .price-form {
+    padding: 15px;
+  }
+}

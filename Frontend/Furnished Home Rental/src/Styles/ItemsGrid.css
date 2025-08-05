@@ -1,0 +1,131 @@
+/* General card styling */
+.property-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 15px;
+  transition: transform 0.3s ease-in-out;
+}
+
+.property-card:hover {
+  transform: scale(1.02);
+}
+
+/* Property image should cover the entire card */
+.property-card .property-image {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 15px;
+}
+
+/* Favorite (heart) icon styling */
+.favorite-icon {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 24px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 10px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color 0.3s ease-in-out;
+}
+
+.favorite-icon:hover {
+  color: red;
+}
+
+/* Rating heart icon styling */
+.rating-heart {
+  font-size: 14px;
+  color: gray;
+  margin-left: 5px;
+  cursor: pointer;
+  transition: color 0.3s ease-in-out;
+}
+
+.rating-heart:hover,
+.rating-heart.rated {
+  color: red;
+}
+
+/* Host avatar styling */
+.host-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+/* Property details */
+/* .card-body {
+  padding: 15px;
+} */
+
+.property-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.property-location {
+  font-size: 14px;
+  color: gray;
+}
+
+.property-price {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Rating star */
+.rating {
+  font-size: 14px;
+  margin-left: auto;
+  color: gold;
+}
+
+/* Loader styles */
+.loading-card {
+  background-color: #f0f0f0;
+  border: none;
+  animation: pulse 1.5s infinite;
+}
+
+.loading-image {
+  width: 100%;
+  height: 250px;
+  background-color: #e0e0e0;
+  border-radius: 15px;
+}
+
+.loading-title,
+.loading-text {
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
+.loading-title {
+  width: 60%;
+  height: 20px;
+}
+
+.loading-text {
+  width: 80%;
+  height: 15px;
+}
+
+@keyframes pulse {
+  0% {
+    background-color: #f0f0f0;
+  }
+  50% {
+    background-color: #e0e0e0;
+  }
+  100% {
+    background-color: #f0f0f0;
+  }
+}

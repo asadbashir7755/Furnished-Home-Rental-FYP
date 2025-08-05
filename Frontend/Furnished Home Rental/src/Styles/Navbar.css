@@ -1,0 +1,58 @@
+.navbar {
+  background-color: white; /* Changed background color to white */
+  color: black;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Added shadow for better visibility */
+}
+
+.navbar-brand img {
+  margin-right: 10px;
+}
+
+.navbar-nav .nav-item .nav-link {
+  color: gray; /* Changed text color to gray */
+  padding: 10px 15px;
+  transition: color 0.3s ease, background-color 0.3s ease;
+  border-radius: 5px; /* Added border radius for better appearance */
+  font-size: 1rem; /* Enhanced text size */
+  font-weight: 500; /* Enhanced text weight */
+}
+
+.navbar-nav .nav-item .nav-link:hover {
+  color: black; /* Changed hover color to black */
+  background-color: rgba(0, 0, 0, 0.1); /* Added background color on hover */
+  text-decoration: none; /* Removed underline on hover */
+}
+
+.navbar-nav .nav-item .nav-link.active {
+  font-weight: bold;
+  color: black; /* Changed active link color to black */
+  border-bottom: 2px solid black; /* Added line below active link */
+  background-color: transparent; /* Removed background color for active link */
+}
+
+.navbar-toggler {
+  border: none;
+  color: black; /* Ensure the toggle button icon is black */
+}
+
+.btn {
+  background-color: #ff69b4; /* Changed button color to a professional pink type */
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin: 5px;
+}
+
+.btn:hover {
+  background-color: #ff1493; /* Darker shade of pink for hover */
+}
+
+@media (max-width: 992px) {
+  .navbar-nav {
+    text-align: center;
+  }
+}

@@ -1,0 +1,40 @@
+.amenities-form {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  margin: 0;
+  padding: 20px;
+}
+
+.amenities-form h3 {
+  font-weight: bold;
+  color: #333;
+}
+
+.amenities-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #007bff;
+  margin-bottom: 20px;
+}
+
+.amenities-checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.amenities-checkbox-group .ant-checkbox-group-item {
+  width: 25%; /* Show amenities in four columns */
+  margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+  .amenities-form {
+    padding: 15px;
+  }
+
+  .amenities-checkbox-group .ant-checkbox-group-item {
+    width: 50%; /* Adjust for smaller screens */
+  }
+}

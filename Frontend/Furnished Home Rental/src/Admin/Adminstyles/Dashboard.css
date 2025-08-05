@@ -1,0 +1,14 @@
+.header {
+  background-color: #e9ecef;
+  padding: 25px;
+  text-align: center;
+  color: #343a40;
+  font-size: 32px; /* Increased font size */
+  font-weight: bold;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  height: auto;
+  margin-bottom: 20px;
+}

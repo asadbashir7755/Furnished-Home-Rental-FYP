@@ -1,0 +1,44 @@
+.review-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.edit-button {
+  margin-top: 10px;
+  margin-bottom: 20px;
+  background-color: #1890ff;
+  color: white;
+  border: none;
+  width: 200px;
+  height: 50px;
+}
+
+.edit-button:hover {
+  background-color: #40a9ff;
+  color: white;
+}
+
+.submit-button {
+  background-color: #52c41a;
+  color: white;
+  border: none;
+  width: 250px;
+  height: 60px;
+  font-size: 18px;
+}
+
+.submit-button:hover {
+  background-color: #73d13d;
+  color: white;
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.ant-divider-horizontal {
+  margin: 20px 0;
+}

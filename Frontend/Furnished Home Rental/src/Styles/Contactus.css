@@ -1,0 +1,117 @@
+/* Stylish Form Container */
+.contactus-container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 40px;
+  background: linear-gradient(135deg, #ffffff, #f1f5f9);
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease-in-out;
+  border: 1px solid #e0e0e0;
+}
+
+.contactus-container:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+/* Stylish Header */
+.contactus-container h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #2c3e50;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  position: relative;
+}
+
+.contactus-container h2::after {
+  content: "";
+  width: 80px;
+  height: 3px;
+  background: #007bff;
+  display: block;
+  margin: 8px auto 0;
+  border-radius: 2px;
+}
+
+/* Form Group Styling */
+.contactus-container .form-group {
+  margin-bottom: 25px;
+  position: relative;
+}
+
+/* Enhanced Labels */
+.contactus-container .form-group label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  display: block;
+  text-transform: capitalize;
+}
+
+/* Input Fields */
+.contactus-container .form-control {
+  border-radius: 8px;
+  border: 1px solid #ced4da;
+  padding: 14px;
+  font-size: 17px;
+  transition: all 0.3s ease-in-out;
+  background: #f9f9f9;
+  color: #333;
+  width: 100%;
+  display: block;
+}
+
+.contactus-container .form-control:focus {
+  border-color: #007bff;
+  background: #fff;
+  outline: none;
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.25);
+}
+
+/* Textarea Styling */
+.contactus-container textarea.form-control {
+  resize: none;
+  height: 160px;
+}
+
+/* Button Styling */
+.contactus-container .btn-primary {
+  width: 100%;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 17px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #30363b, #0056b3);
+  border: none;
+  color: white;
+  transition: all 0.3s ease-in-out;
+}
+
+.contactus-container .btn-primary:hover {
+  background: linear-gradient(135deg, #0056b3, #003d80);
+}
+
+/* Responsive Design */
+@media (max-width: 576px) {
+  .contactus-container {
+    padding: 25px;
+  }
+
+  .contactus-container h2 {
+    font-size: 24px;
+  }
+
+  .contactus-container .form-control {
+    padding: 12px;
+    font-size: 16px;
+  }
+
+  .contactus-container .btn-primary {
+    padding: 12px;
+    font-size: 16px;
+  }
+}

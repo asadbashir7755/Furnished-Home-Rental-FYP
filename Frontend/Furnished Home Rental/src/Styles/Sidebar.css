@@ -1,0 +1,133 @@
+.sidebar {
+  height: 100%;
+  width: 300px; /* Increased width */
+  position: fixed;
+  top: 0;
+  left: -300px; /* Adjusted for increased width */
+  background: #ffffff; /* Changed to white background */
+  overflow-x: hidden;
+  transition: 0.3s;
+  padding-top: 60px;
+  z-index: 1000;
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5); /* Add shadow to the sidebar */
+}
+
+.sidebar.active {
+  left: 0;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px 20px;
+}
+
+.sidebar-close {
+  font-size: 24px;
+  cursor: pointer;
+  color: #333;
+}
+
+.sidebar-nav {
+  list-style-type: none;
+  padding: 0;
+}
+
+.sidebar-item {
+  margin: 10px 0; /* Adjusted top margin */
+  padding: 10px 20px; /* Adjusted padding for better spacing */
+  text-align: left;
+}
+
+.sidebar-link {
+  color: #333;
+  text-decoration: none;
+  display: flex; /* Changed to flex for icon alignment */
+  align-items: center; /* Center items vertically */
+  justify-content: center; /* Center items horizontally */
+  font-size: 18px; /* Increased font size */
+  transition: color 0.3s ease, background-color 0.3s ease;
+  background-color: rgba(0, 0, 0, 0.05); /* Box background color */
+  border-radius: 5px; /* Rounded corners */
+  margin: 10px 20px; /* Adjusted spacing between items */
+  padding: 12px 20px; /* Adjusted padding inside the box */
+  cursor: pointer; /* Pointer cursor */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add shadow to the items */
+}
+
+.sidebar-link .sidebar-icon {
+  font-size: 24px; /* Increased icon size */
+  color: black; /* Changed icon color to black */
+}
+
+.sidebar-link:hover {
+  color: #007bff;
+  background-color: rgba(0, 123, 255, 0.1); /* Add a slight background color on hover */
+  transform: scale(1.05); /* Slightly enlarge on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add shadow on hover */
+}
+
+.sidebar .btn-primary {
+  display: flex; /* Changed to flex for icon alignment */
+  align-items: center; /* Center items vertically */
+  justify-content: center; /* Center items horizontally */
+  width: 80%;
+  margin: 20px auto;
+  padding: 12px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+  background: #333; /* Changed button color to black */
+  border: none;
+  color: white;
+  transition: all 0.3s ease-in-out;
+  border-radius: 5px; /* Added border radius */
+}
+
+.sidebar .btn-primary .sidebar-icon {
+  font-size: 24px; /* Increased icon size */
+  color: white; /* Changed icon color to white */
+}
+
+.sidebar .btn-primary:hover {
+  background: #555; /* Darker shade of black for hover */
+}
+
+@media (max-width: 576px) {
+  .sidebar {
+    width: 100%;
+    left: 0;
+    bottom: 0; /* Position at the bottom */
+    top: auto; /* Remove top positioning */
+    height: auto; /* Adjust height */
+    padding-top: 0; /* Remove top padding */
+    box-shadow: none; /* Remove shadow */
+    border-top: 1px solid #ddd; /* Add top border */
+  }
+
+  .sidebar-header {
+    display: none; /* Hide close button */
+  }
+
+  .sidebar-nav {
+    display: flex;
+    justify-content: space-around; /* Space items evenly */
+  }
+
+  .sidebar-item {
+    margin: 0; /* Remove margin */
+    padding: 10px 0; /* Adjust padding */
+  }
+
+  .sidebar-link {
+    margin: 0; /* Remove margin */
+    padding: 10px; /* Adjust padding */
+    box-shadow: none; /* Remove shadow */
+  }
+
+  .sidebar .btn-primary {
+    width: 100%; /* Full width button */
+    margin: 0; /* Remove margin */
+    border-radius: 0; /* Remove border radius */
+  }
+}
