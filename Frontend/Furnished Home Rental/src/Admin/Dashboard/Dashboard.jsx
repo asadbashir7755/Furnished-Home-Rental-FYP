@@ -1,9 +1,10 @@
-import React, { useEffect } from "react";
-import { FaUsers, FaBox, FaClipboardList } from "react-icons/fa";
+import React, { useEffect, useState } from "react";
+import { FaUsers, FaBox, FaClipboardList, FaEnvelope, FaCalendarCheck } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { Layout, Card, Row, Col, Button, message } from 'antd';
 import Sidebar from "./DashboardSettings";
 import { useFormContext } from "../FormContext";
+import { fetchUsersStats, fetchItemsStats, fetchReservationsStats, fetchContactsStats } from "../Api/DashboardApi";
 import "../Adminstyles/Dashboard.css";
 
 const { Header, Content } = Layout;
@@ -33,11 +34,33 @@ const Dashboard = () => {
   const { dashboardData, fetchDashboardData } = useFormContext();
   const navigate = useNavigate();
 
+  // Add local state for reservations and contacts counts
+  const [usersCount, setUsersCount] = useState(0);
+  const [itemsCount, setItemsCount] = useState(0);
+  const [reservationsCount, setReservationsCount] = useState(0);
+  const [contactsCount, setContactsCount] = useState(0);
+
   useEffect(() => {
-    if (dashboardData.users === 0 && dashboardData.items === 0) {
-      fetchDashboardData();
-    }
-  }, [dashboardData, fetchDashboardData]);
+    // Fetch all counts from API
+    const fetchAllStats = async () => {
+      try {
+        const usersRes = await fetchUsersStats();
+        setUsersCount(usersRes.usersCount || 0);
+        const itemsRes = await fetchItemsStats();
+        setItemsCount(itemsRes.itemsCount || 0);
+        const reservationsRes = await fetchReservationsStats();
+        setReservationsCount(reservationsRes.reservationsCount || 0);
+        const contactsRes = await fetchContactsStats();
+        setContactsCount(contactsRes.contactsCount || 0);
+      } catch (err) {
+        setUsersCount(0);
+        setItemsCount(0);
+        setReservationsCount(0);
+        setContactsCount(0);
+      }
+    };
+    fetchAllStats();
+  }, []);
 
   return (
     <Layout>
@@ -48,7 +71,7 @@ const Dashboard = () => {
           <Row gutter={[16, 16]} justify="center">
             <StatCard
               title="Manage Users"
-              value={<strong>{dashboardData.users}</strong>}
+              value={<strong>{usersCount}</strong>}
               icon={<FaUsers className="fs-1" />}
               color="#e9ecef"
               iconColor="#007bff"
@@ -56,7 +79,7 @@ const Dashboard = () => {
             />
             <StatCard
               title="List Items"
-              value={<strong>{dashboardData.items}</strong>}
+              value={<strong>{itemsCount}</strong>}
               icon={<FaBox className="fs-1" />}
               color="#e9ecef"
               iconColor="#28a745"
@@ -64,11 +87,27 @@ const Dashboard = () => {
             />
             <StatCard
               title="Listed Items"
-              value={<strong>{dashboardData.items}</strong>}
+              value={<strong>{itemsCount}</strong>}
               icon={<FaClipboardList className="fs-1" />}
               color="#e9ecef"
               iconColor="#ffc107"
               onClick={() => navigate("/ShowItems")}
+            />
+            <StatCard
+              title="Reservations"
+              value={<strong>{reservationsCount}</strong>}
+              icon={<FaCalendarCheck className="fs-1" />}
+              color="#e9ecef"
+              iconColor="#17a2b8"
+              onClick={() => navigate("/ManageReservations")}
+            />
+            <StatCard
+              title="Contact Messages"
+              value={<strong>{contactsCount}</strong>}
+              icon={<FaEnvelope className="fs-1" />}
+              color="#e9ecef"
+              iconColor="#6f42c1"
+              onClick={() => navigate("/ManageContacts")}
             />
           </Row>
         </Content>
@@ -76,5 +115,7 @@ const Dashboard = () => {
     </Layout>
   );
 };
+
+
 
 export default Dashboard;

@@ -239,3 +239,20 @@ exports.resetPassword = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+exports.updateProfile = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const updateData = req.body;
+        const user = await User.findByIdAndUpdate(
+            userId,
+            updateData,
+            { new: true, select: "-password -confirmPassword -verificationCode" }
+        );
+        if (!user) return res.status(404).json({ message: "User not found" });
+        res.json({ message: "Profile updated successfully", user });
+    } catch (error) {
+        console.error("Error updating user profile:", error);
+        res.status(500).json({ message: error.message });
+    }
+};

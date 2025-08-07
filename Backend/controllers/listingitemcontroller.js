@@ -25,15 +25,16 @@ exports.addItem = async (req, res) => {
         })) : [];
         console.log("mediaFiles in add item : ", mediaFiles);
 
-        const { address, pricing } = req.body; // Use address and pricing fields directly
+        const { _id, address, pricing, status } = req.body; // Accept _id from frontend
         const parsedAddress = typeof address === "string" ? JSON.parse(address) : address;
         const parsedPricing = typeof pricing === "string" ? JSON.parse(pricing) : pricing;
 
-        console.log("check : ", parsedAddress, parsedPricing);
         const newItem = new ListingItem({
+            _id, // Explicitly set _id if provided
             ...req.body,
-            address: parsedAddress,  // Corrected field name
-            pricing: parsedPricing,  // Corrected field name
+            address: parsedAddress,
+            pricing: parsedPricing,
+            status,
             mediaFiles
         });
         await newItem.save();
@@ -50,22 +51,51 @@ exports.updateItem = async (req, res) => {
         const mediaFiles = req.files ? req.files.map(file => ({
             url: `${req.protocol}://${req.get('host')}/uploads/${file.filename}`,
             type: file.mimetype.startsWith('image/') ? 'image' : 'video'
-        })) : null; // Set to null if no new files are uploaded
+        })) : undefined;
         console.log("mediaFiles : ", mediaFiles);
-        const { address, pricing } = req.body; // Use address and pricing fields directly
+        
+        // Destructure all needed fields from req.body
+        const { address, pricing, status, mediaFiles: bodyMediaFiles } = req.body;
         const parsedAddress = typeof address === "string" ? JSON.parse(address) : address;
         const parsedPricing = typeof pricing === "string" ? JSON.parse(pricing) : pricing;
 
+        // Create base update data without mediaFiles
         const updateData = {
-            ...req.body,
-            address: parsedAddress,  // Corrected field name
-            pricing: parsedPricing
+            description: req.body.description,
+            listingName: req.body.listingName,
+            externalListingName: req.body.externalListingName,
+            tags: req.body.tags,
+            personCapacity: req.body.personCapacity,
+            propertyType: req.body.propertyType,
+            roomType: req.body.roomType,
+            numBedrooms: req.body.numBedrooms,
+            numBeds: req.body.numBeds,
+            numBathrooms: req.body.numBathrooms,
+            bathroomType: req.body.bathroomType,
+            numGuestBathrooms: req.body.numGuestBathrooms,
+            address: parsedAddress,
+            pricing: parsedPricing,
+            status,
+            amenities: req.body.amenities,
         };
-        if (mediaFiles) {
+
+        // If new files were uploaded, add them to updateData
+        if (req.files && req.files.length > 0) {
             updateData.mediaFiles = mediaFiles;
+            console.log("New media files uploaded, updating mediaFiles");
+        } 
+        // Otherwise DON'T include mediaFiles in updateData to keep existing ones
+        else {
+            console.log("No new media files, keeping existing ones");
         }
 
-        const updatedItem = await ListingItem.findByIdAndUpdate(req.params.id, updateData, { new: true });
+        console.log("Final update data:", Object.keys(updateData));
+        const updatedItem = await ListingItem.findByIdAndUpdate(
+            req.params.id,
+            updateData,
+            { new: true }
+        );
+        
         if (!updatedItem) return res.status(404).json({ message: "Item not found" });
         res.status(200).json({ message: "Item updated successfully", item: updatedItem });
     } catch (error) {
@@ -89,7 +119,12 @@ exports.getItem = async (req, res) => {
     try {
         const item = await ListingItem.findById(req.params.id);
         if (!item) return res.status(404).json({ message: "Item not found" });
-        res.status(200).json(item);
+
+        // Fetch blocked dates for this property
+        const blockedDates = await BlockedDate.find({ propertyId: req.params.id })
+            .select('startDate endDate -_id');
+
+        res.status(200).json({ ...item.toObject(), blockedDates });
     } catch (error) {
         console.error("Error fetching item:", error);
         res.status(500).json({ message: error.message });
@@ -191,4 +226,3 @@ exports.searchItems = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
-

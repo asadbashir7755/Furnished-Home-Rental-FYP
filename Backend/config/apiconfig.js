@@ -16,6 +16,9 @@ const API_ENDPOINTS = {
         updateItem: (id) => `${API_BASE_URL}/items/update/${id}`,
         deleteItem: (id) => `${API_BASE_URL}/items/delete/${id}`,
     },
+    checkout: {
+        createSession: `${API_BASE_URL}/checkout/create-session`,
+    },
 };
 
 module.exports = API_ENDPOINTS;

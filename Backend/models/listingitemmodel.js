@@ -39,6 +39,11 @@ const listingItemSchema = new mongoose.Schema({
     amenities: { type: [String] },
     mediaFiles: [mediaFileSchema],
     pricing: pricingSchema,
+    status: {
+        type: String,
+        enum: ['new', 'featured', 'booked', 'available', 'onmaintenance'],
+        default: 'available'
+    },
 }, { timestamps: true });
 
 module.exports = mongoose.model("ListingItem", listingItemSchema);

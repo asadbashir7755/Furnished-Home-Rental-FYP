@@ -1,246 +1,475 @@
-import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
-import { Carousel, Row, Col, Card, Typography, List, Modal, Divider, Calendar, Rate, Button, Avatar, Space } from "antd";
-import { FaWifi, FaSwimmer, FaParking, FaDumbbell, FaTv, FaAirFreshener, FaPaw, FaMountain, FaUtensils } from "react-icons/fa";
-import { CalendarOutlined, UserOutlined } from "@ant-design/icons";
+import React, { useState, useMemo, useRef, useEffect, useContext } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { DatePicker, message, Modal, Rate, Avatar, Tooltip, Divider } from "antd";
+import {
+  FaWifi, FaParking, FaTshirt, FaTv, FaUtensils, FaMugHot, FaBath, FaBed, FaDoorOpen, FaHome, FaToilet, FaMapMarkerAlt, FaUsers, FaCheck, FaStar, FaMapMarker, FaArrowLeft, FaArrowRight
+} from "react-icons/fa";
+import { UserOutlined } from "@ant-design/icons";
+import { createCheckoutSession } from "./API/checkout";
+import "../../Styles/property_details.css";
+import dayjs from "dayjs";
+import { UserContext } from '../Context/UserContext';
+import { Modal as AntModal } from "antd";
 
-const { Title, Text } = Typography;
+const { RangePicker } = DatePicker;
 
 const amenitiesIcons = {
-  "WiFi": <FaWifi />,
-  "Swimming Pool": <FaSwimmer />,
-  "Parking": <FaParking />,
-  "Gym": <FaDumbbell />,
-  "TV": <FaTv />,
-  "Air Conditioning": <FaAirFreshener />,
-  "Pets allowed": <FaPaw />,
-  "Mountain view": <FaMountain />,
-  "Kitchen": <FaUtensils />,
+  Wifi: <FaWifi />,
+  Parking: <FaParking />,
+  Washer: <FaTshirt />,
+  TV: <FaTv />,
+  Dishwasher: <FaUtensils />,
+  Microwave: <FaMugHot />,
+  // Add more as needed
 };
 
+const EXTRA_GUEST_CHARGE = 10; // $10/night per extra guest
+
 const PropertyDetails = () => {
-  const { state } = useLocation();
-  const property = state?.property;
+  const location = useLocation();
+  const navigate = useNavigate();
+  const property = location.state?.property;
+  const { user } = useContext(UserContext);
 
-  if (!property) {
-    return <div>Property details not available.</div>;
-  }
+  if (!property) return <div className="container my-5">Property not found.</div>;
 
-  const [visible, setVisible] = useState(false);
+  const [dates, setDates] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [checkInDate, setCheckInDate] = useState(null);
-  const [checkOutDate, setCheckOutDate] = useState(null);
+  const [guestCount, setGuestCount] = useState(1);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [blockedRanges, setBlockedRanges] = useState([]);
+  const [personCapacity, setPersonCapacity] = useState(property.personCapacity || 1);
+  const [confirmOverCapacity, setConfirmOverCapacity] = useState(false);
+  const [applyExtraCharge, setApplyExtraCharge] = useState(false);
 
-  const handleImageClick = (url) => {
-    setSelectedImage(url);
-    setVisible(true);
+  const nights = useMemo(() => {
+    // Defensive: ensure dates is an array and has two valid values
+    if (Array.isArray(dates) && dates.length === 2 && dates[0] && dates[1]) {
+      const start = dates[0]?.toDate ? dates[0].toDate() : new Date(dates[0]);
+      const end = dates[1]?.toDate ? dates[1].toDate() : new Date(dates[1]);
+      return Math.max(0, Math.round((end - start) / (1000 * 60 * 60 * 24)));
+    }
+    return 0;
+  }, [dates]);
+
+  // Calculate extra guest charge
+  const extraGuests = Math.max(0, guestCount - personCapacity);
+  const extraGuestChargeTotal = applyExtraCharge ? extraGuests * nights * EXTRA_GUEST_CHARGE : 0;
+
+  // Price details with extra guest charge
+  const priceDetails = useMemo(() => {
+    if (nights > 0) {
+      const pricePerNight = Number(property.pricing.pricePerNight);
+      const weeklyDiscount = Number(property.pricing.weeklyDiscount) || 0;
+      const monthlyDiscount = Number(property.pricing.monthlyDiscount) || 0;
+      let basePrice = pricePerNight * nights;
+      let discountAmount = 0;
+      let total = basePrice;
+
+      // Monthly discount
+      if (nights >= 30 && monthlyDiscount > 0) {
+        discountAmount = basePrice * (monthlyDiscount / 100);
+        total = basePrice - discountAmount;
+      }
+      // Weekly discount (only if not eligible for monthly)
+      else if (nights >= 7 && weeklyDiscount > 0) {
+        discountAmount = basePrice * (weeklyDiscount / 100);
+        total = basePrice - discountAmount;
+      }
+
+      // Add extra guest charge if applicable
+      total += extraGuestChargeTotal;
+
+      return {
+        basePrice: Math.round(basePrice),
+        discountAmount: Math.round(discountAmount),
+        discountType:
+          nights >= 30 && monthlyDiscount > 0
+            ? "monthly"
+            : nights >= 7 && weeklyDiscount > 0
+            ? "weekly"
+            : null,
+        total: Math.round(total),
+        pricePerNight,
+        nights,
+        weeklyDiscount,
+        monthlyDiscount,
+        extraGuestChargeTotal,
+        extraGuests,
+      };
+    }
+    return {
+      basePrice: 0,
+      discountAmount: 0,
+      discountType: null,
+      total: 0,
+      pricePerNight: Number(property.pricing.pricePerNight),
+      nights: 0,
+      weeklyDiscount: Number(property.pricing.weeklyDiscount) || 0,
+      monthlyDiscount: Number(property.pricing.monthlyDiscount) || 0,
+      extraGuestChargeTotal: 0,
+      extraGuests: 0,
+    };
+  }, [
+    nights,
+    property.pricing.pricePerNight,
+    property.pricing.weeklyDiscount,
+    property.pricing.monthlyDiscount,
+    extraGuestChargeTotal,
+    extraGuests,
+  ]);
+
+  const handleReserve = async () => {
+    if (!user) {
+      message.info("Please login to reserve a property.");
+      navigate("/login");
+      return;
+    }
+    if (nights <= 0) {
+      message.error("Please select valid check-in and check-out dates.");
+      return;
+    }
+    if (guestCount > personCapacity && !applyExtraCharge) {
+      setConfirmOverCapacity(true);
+      return;
+    }
+    await proceedReservation();
   };
 
-  const onSelectDate = (date) => {
-    if (!checkInDate) {
-      setCheckInDate(date);
-    } else if (!checkOutDate) {
-      setCheckOutDate(date);
-    } else {
-      setCheckInDate(date);
-      setCheckOutDate(null);
+  const proceedReservation = async () => {
+    try {
+      const selectedDates = [
+        dates[0]?.toISOString ? dates[0].toISOString() : dates[0],
+        dates[1]?.toISOString ? dates[1].toISOString() : dates[1],
+      ];
+      const reservationData = {
+        propertyId: property._id,
+        dates: {
+          startDate: selectedDates[0],
+          endDate: selectedDates[1],
+        },
+        guests: guestCount,
+        total: priceDetails.total,
+        selectedDates,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+        },
+        extraGuestChargeTotal: priceDetails.extraGuestChargeTotal,
+        extraGuests: priceDetails.extraGuests,
+      };
+      const result = await createCheckoutSession(reservationData);
+      navigate("/checkout", { state: { clientSecret: result.clientSecret, property, reservationData, priceDetails } });
+    } catch (err) {
+      message.error("Failed to initiate payment. Please try again.");
     }
   };
 
-  const calculateTotalPrice = () => {
-    if (!checkInDate || !checkOutDate) return 0;
-    const nights = Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24));
-    const basePrice = nights * property.pricing.pricePerNight;
-    const cleaningFee = 59;
-    const serviceFee = 112; 
-    return basePrice + cleaningFee + serviceFee;
+  const reviews = property.reviews || [];
+
+  const goToPrevious = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex === 0 ? property.mediaFiles.length - 1 : prevIndex - 1));
+  };
+
+  const goToNext = () => {
+    setCurrentImageIndex((prevIndex) => (prevIndex === property.mediaFiles.length - 1 ? 0 : prevIndex + 1));
+  };
+
+  const handleThumbnailClick = (index) => {
+    setCurrentImageIndex(index);
+  };
+
+  const imageList = property.mediaFiles && property.mediaFiles.length > 0
+    ? property.mediaFiles
+    : [{ url: "/default-property.jpg" }];
+
+  // Fetch blocked dates once when the page loads
+  useEffect(() => {
+    async function fetchBlockedDates() {
+      if (property?._id) {
+        try {
+          console.log("Fetching blocked dates for property:", property._id);
+          const res = await fetch(`http://localhost:5000/api/items/list/${property._id}`);
+          const text = await res.text();
+          try {
+            const data = JSON.parse(text);
+            console.log("Blocked dates API response (raw):", data);
+            if (Array.isArray(data.blockedDates)) {
+              data.blockedDates.forEach((range, idx) => {
+                console.log(`Blocked range [${idx}]:`, range);
+              });
+            }
+            // Use only the blockedDates array from the response
+            setBlockedRanges(data.blockedDates || []);
+            if (data.personCapacity) setPersonCapacity(Number(data.personCapacity));
+          } catch (jsonErr) {
+            console.error("Blocked dates API did not return JSON. Raw response:", text);
+          }
+        } catch (err) {
+          console.error("Error fetching blocked dates:", err);
+        }
+      }
+    }
+    fetchBlockedDates();
+    // eslint-disable-next-line
+  }, [property?._id]);
+
+  // Helper to check if a date is blocked
+  const isDateBlocked = (date) => {
+    const d = dayjs(date).startOf("day");
+    if (!d.isValid()) return false;
+    return Array.isArray(blockedRanges) && blockedRanges.some(range => {
+      const start = dayjs(range.startDate).startOf("day");
+      const end = dayjs(range.endDate).startOf("day");
+      if (!start.isValid() || !end.isValid()) return false;
+      return d.valueOf() >= start.valueOf() && d.valueOf() <= end.valueOf();
+    });
+  };
+
+  // Prevent selecting a range that includes any blocked date (using timestamps, not dayjs methods)
+  const isRangeBlocked = (start, end) => {
+    const startTime = dayjs(start).startOf("day").valueOf();
+    const endTime = dayjs(end).startOf("day").valueOf();
+    if (!startTime || !endTime) return false;
+    // Loop through each day in the range
+    for (let t = startTime; t <= endTime; t += 24 * 60 * 60 * 1000) {
+      if (isDateBlocked(t)) return true;
+    }
+    return false;
   };
 
   return (
     <div className="container my-5">
-      <Title level={2} className="mb-4">{property.listingName}</Title>
-      <Text className="d-block mb-3">
-        {property.address.city}, {property.address.state}, {property.address.country}
-      </Text>
-      <Text className="d-block mb-3">
-        {property.personCapacity} guests · {property.numBedrooms} bedrooms · {property.numBathrooms} baths
-      </Text>
-      <Row gutter={[16, 16]}>
-        <Col xs={24} md={16}>
-          <Carousel autoplay>
-            {property.mediaFiles.map((file, index) => (
-              <div key={index}>
-                <img src={file.url} alt={`Property image ${index + 1}`} style={styles.image} onClick={() => handleImageClick(file.url)} />
+      <div className="row gx-5 gy-4">
+        {/* Left: Gallery and Info */}
+        <div className="col-lg-7">
+          <div className="property-gallery professional-card">
+            <div className="carousel-container">
+              <img
+                src={imageList[currentImageIndex].url}
+                alt={`Property image ${currentImageIndex + 1}`}
+                className="carousel-image"
+                onClick={() => setSelectedImage(imageList[currentImageIndex].url)}
+              />
+              <div className="carousel-nav">
+                <button className="carousel-btn" onClick={goToPrevious}><FaArrowLeft /></button>
+                <button className="carousel-btn" onClick={goToNext}><FaArrowRight /></button>
               </div>
-            ))}
-          </Carousel>
-          <div className="image-gallery mt-4">
-            {property.mediaFiles.map((file, index) => (
-              <img key={index} src={file.url} alt={`Property image ${index + 1}`} style={styles.thumbnail} onClick={() => handleImageClick(file.url)} />
-            ))}
-          </div>
-        </Col>
-        <Col xs={24} md={8}>
-          <Card style={styles.bookingCard}>
-            <Title level={4}>${property.pricing.pricePerNight} / night</Title>
-            <div style={styles.datePicker}>
-              <Space direction="vertical" style={{ width: "100%" }}>
-                <Text strong>Check-in</Text>
-                <Text>{checkInDate ? checkInDate.format("MMM D, YYYY") : "Select date"}</Text>
-                <Text strong>Check-out</Text>
-                <Text>{checkOutDate ? checkOutDate.format("MMM D, YYYY") : "Select date"}</Text>
-              </Space>
             </div>
-            <Button type="primary" block style={styles.reserveButton}>
-              Reserve
-            </Button>
-            <Text style={{ display: "block", textAlign: "center", marginTop: "10px" }}>
-              You won't be charged yet
-            </Text>
+            <div className="thumbnail-list">
+              {imageList.map((file, index) => (
+                <img
+                  key={index}
+                  src={file.url}
+                  alt={`Property image ${index + 1}`}
+                  className={`thumbnail-item ${index === currentImageIndex ? 'active' : ''}`}
+                  onClick={() => handleThumbnailClick(index)}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="property-info professional-card">
+            <h1 className="property-title">
+              <FaHome className="icon-title" /> {property.listingName}
+            </h1>
+            <div className="address">
+              <FaMapMarkerAlt />
+              <a href={`https://www.google.com/maps/place/${encodeURIComponent(property.address.publicAddress)}`} target="_blank" rel="noopener noreferrer">
+                {property.address.publicAddress}
+              </a>
+            </div>
             <Divider />
-            <Space direction="vertical" style={{ width: "100%" }}>
-              <Space justify="space-between" style={{ width: "100%" }}>
-                <Text>${property.pricing.pricePerNight} x {checkInDate && checkOutDate ? Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)) : 0} nights</Text>
-                <Text>${checkInDate && checkOutDate ? property.pricing.pricePerNight * Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)) : 0}</Text>
-              </Space>
-              <Space justify="space-between" style={{ width: "100%" }}>
-                <Text>Cleaning fee</Text>
-                <Text>$59</Text>
-              </Space>
-              <Space justify="space-between" style={{ width: "100%" }}>
-                <Text>Airbnb service fee</Text>
-                <Text>$112</Text>
-              </Space>
-              <Divider />
-              <Space justify="space-between" style={{ width: "100%" }}>
-                <Text strong>Total before taxes</Text>
-                <Text strong>${calculateTotalPrice()}</Text>
-              </Space>
-            </Space>
-          </Card>
-        </Col>
-      </Row>
+            <div className="summary-icons">
+              <span><FaUsers /> {property.personCapacity} Guests</span>
+              <span><FaBed /> {property.numBedrooms} Bedrooms</span>
+              <span><FaBath /> {property.numBathrooms} Bathrooms</span>
+            </div>
+            <Divider />
+            <h3 className="section-heading">About this place</h3>
+            <p className="description">{property.description}</p>
+          </div>
 
-      <Divider />
-      <Title level={3}>About this space</Title>
-      <Text>{property.description}</Text>
+          <div className="amenities-section professional-card">
+            <h3 className="section-heading">What this place offers</h3>
+            <div className="amenities-grid">
+              {property.amenities && property.amenities.length > 0 ? (
+                property.amenities.map((amenity, idx) => (
+                  <div className="amenity-item" key={idx}>
+                    {amenitiesIcons[amenity] || <FaCheck className="icon" />} {amenity}
+                  </div>
+                ))
+              ) : (
+                <div className="amenity-item">No amenities listed</div>
+              )}
+            </div>
+          </div>
 
-      <Divider />
-      <Title level={3}>Where you'll sleep</Title>
-      <Row gutter={[16, 16]}>
-        {Array.from({ length: property.numBedrooms }, (_, i) => (
-          <Col xs={24} sm={12} md={8} key={i}>
-            <Card title={`Bedroom ${i + 1}`}>
-              <Text>1 double bed</Text>
-            </Card>
-          </Col>
-        ))}
-      </Row>
-
-      <Divider />
-      <Title level={3}>What this place offers</Title>
-      <List
-        dataSource={property.amenities}
-        renderItem={(item) => (
-          <List.Item>
-            {amenitiesIcons[item.trim()] || <FaAirFreshener />} <Text style={styles.amenityText}>{item}</Text>
-          </List.Item>
-        )}
-        grid={{ gutter: 16, column: 1, xs: 1, sm: 2, md: 3 }}
-      />
-
-      <Divider />
-      <Title level={3}>Select check-in date</Title>
-      <Text>5 nights in {property.address.city}</Text>
-      <Calendar onSelect={onSelectDate} fullscreen={false} style={{ marginTop: "20px" }} />
-
-      <Divider />
-      <Title level={3}>
-        <Rate disabled defaultValue={4.85} style={{ marginRight: "10px" }} /> 4.85 · 27 reviews
-      </Title>
-      <Row gutter={[16, 16]}>
-        <Col span={12}>
-          <Space direction="vertical" style={{ width: "100%" }}>
-            <Text strong>Cleanliness</Text>
-            <Rate disabled defaultValue={4.8} />
-            <Text strong>Accuracy</Text>
-            <Rate disabled defaultValue={4.9} />
-            <Text strong>Check-in</Text>
-            <Rate disabled defaultValue={4.9} />
-          </Space>
-        </Col>
-        <Col span={12}>
-          <Space direction="vertical" style={{ width: "100%" }}>
-            <Text strong>Communication</Text>
-            <Rate disabled defaultValue={5.0} />
-            <Text strong>Location</Text>
-            <Rate disabled defaultValue={4.8} />
-            <Text strong>Value</Text>
-            <Rate disabled defaultValue={4.6} />
-          </Space>
-        </Col>
-      </Row>
-
-      <Divider />
-      <Row gutter={[16, 16]}>
-        {property.reviews?.slice(0, 4).map((review, index) => (
-          <Col xs={24} sm={12} key={index}>
-            <Space direction="vertical" style={{ width: "100%" }}>
-              <Space>
-                <Avatar icon={<UserOutlined />} />
-                <div>
-                  <Text strong>{review.reviewerName}</Text>
-                  <br />
-                  <Text>{review.date}</Text>
+          <div className="sleeping-arrangements professional-card">
+            <h3 className="section-heading">Where you'll sleep</h3>
+            <div className="room-list">
+              <div>
+                <h4>Bedroom 1</h4>
+                <div className="bed-list">
+                  <div className="bed-item">
+                    <FaBed /> 1 Double bed
+                  </div>
                 </div>
-              </Space>
-              <Text>{review.comment}</Text>
-            </Space>
-          </Col>
-        ))}
-      </Row>
-      <Button style={{ marginTop: "20px" }}>Show all 27 reviews</Button>
+              </div>
+            </div>
+          </div>
 
-      <Modal visible={visible} footer={null} onCancel={() => setVisible(false)}>
+          <div className="trust-elements professional-card">
+            <h3 className="section-heading">Trust & Safety</h3>
+            <span className="badge"><FaCheck /> Verified Host</span>
+            <p className="notice">Book with confidence. Your safety is our priority.</p>
+          </div>
+
+          <div className="reviews-section professional-card">
+            <h3 className="section-heading">Reviews</h3>
+            <div className="no-reviews">
+              <FaStar className="icon" /> No reviews yet
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Booking Card */}
+        <div className="col-lg-5">
+          <div className="booking-section professional-booking-card sticky-booking-card">
+            <div className="booking-header">
+              <span className="price">
+                <span className="price-amount">${property.pricing.pricePerNight}</span>
+                <span className="per-night">/ night</span>
+              </span>
+              <Rate disabled allowHalf defaultValue={property.rating || 4.5} style={{ fontSize: 16, marginLeft: 8 }} />
+            </div>
+            <Divider style={{ margin: "12px 0" }} />
+            <div className="discount-info">
+              {priceDetails.weeklyDiscount > 0 && (
+                <div>
+                  <span role="img" aria-label="week">📅</span> <b>{priceDetails.weeklyDiscount}% off</b> for weekly stays
+                </div>
+              )}
+              {priceDetails.monthlyDiscount > 0 && (
+                <div>
+                  <span role="img" aria-label="month">🗓️</span> <b>{priceDetails.monthlyDiscount}% off</b> for monthly stays
+                </div>
+              )}
+            </div>
+            <div className="booking-form-fields">
+              <label className="booking-label">Select Dates</label>
+              <RangePicker
+                value={dates}
+                onChange={(vals) => {
+                  if (
+                    vals &&
+                    vals.length === 2 &&
+                    vals[0] &&
+                    vals[1] &&
+                    isRangeBlocked(vals[0], vals[1])
+                  ) {
+                    message.error("Selected range includes blocked dates. Please choose another range.");
+                    setDates([]);
+                    return;
+                  }
+                  setDates(vals);
+                  // Log selected dates as before
+                  console.log("Selected dates:", vals);
+                  if (vals && vals.length === 2) {
+                    console.log("Selected ISO dates:", [
+                      vals[0]?.toISOString ? vals[0].toISOString() : vals[0],
+                      vals[1]?.toISOString ? vals[1].toISOString() : vals[1],
+                    ]);
+                  }
+                }}
+                className="ant-picker"
+                allowClear
+                disabledDate={current => {
+                  // Block only blocked dates visually and prevent selecting past dates
+                  const today = dayjs().startOf("day");
+                  // Disable if before today or is blocked
+                  return current && (current.startOf("day").isBefore(today) || isDateBlocked(current));
+                }}
+                style={{ width: "100%" }}
+              />
+              <label className="booking-label" style={{ marginTop: 12 }}>Guests</label>
+              <input
+                type="number"
+                min={1}
+                max={99}
+                value={guestCount}
+                onChange={e => {
+                  setGuestCount(Number(e.target.value));
+                  setApplyExtraCharge(false); // reset extra charge on guest change
+                }}
+                className="form-control"
+                style={{ width: 80 }}
+              />
+            </div>
+            <Divider style={{ margin: "16px 0" }} />
+            {/* Show extra charge message if applicable */}
+            {guestCount > personCapacity && applyExtraCharge && (
+              <div style={{ color: "#d4380d", marginBottom: 8 }}>
+                You have selected {guestCount} guests, but the maximum allowed without extra charge is {personCapacity}.<br />
+                An extra charge of ${EXTRA_GUEST_CHARGE}/night per additional guest will be added.
+              </div>
+            )}
+            <div className="price-breakdown">
+              <div className="breakdown-row">
+                <span>Base price</span>
+                <span>${priceDetails.basePrice}</span>
+              </div>
+              {priceDetails.discountAmount > 0 && (
+                <div className="breakdown-row">
+                  <span>Discount</span>
+                  <span className="discount">-${priceDetails.discountAmount}</span>
+                </div>
+              )}
+              {priceDetails.extraGuestChargeTotal > 0 && (
+                <div className="breakdown-row">
+                  <span>Extra guest charge</span>
+                  <span className="discount">+${priceDetails.extraGuestChargeTotal}</span>
+                </div>
+              )}
+              <div className="breakdown-row total">
+                <span>Total</span>
+                <span>${priceDetails.total}</span>
+              </div>
+            </div>
+            <button className="reserve-btn professional-reserve-btn" onClick={handleReserve}>
+              Reserve
+            </button>
+            <div className="secure-checkout">
+              <FaCheck className="secure-icon" /> Secure checkout, instant confirmation
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Image Modal */}
+      <Modal open={!!selectedImage} footer={null} onCancel={() => setSelectedImage(null)}>
         <img alt="Selected" style={{ width: "100%" }} src={selectedImage} />
       </Modal>
+      <AntModal
+        open={confirmOverCapacity}
+        onOk={() => {
+          setConfirmOverCapacity(false);
+          setApplyExtraCharge(true);
+          proceedReservation();
+        }}
+        onCancel={() => setConfirmOverCapacity(false)}
+        title="Confirm Reservation"
+        okText="Proceed Anyway"
+        cancelText="Cancel"
+      >
+        <p>
+          You have selected {guestCount} guests, but the maximum allowed without extra charge is {personCapacity}.<br />
+          An extra charge of ${EXTRA_GUEST_CHARGE}/night per additional guest will be added.<br />
+          Do you want to proceed anyway?
+        </p>
+      </AntModal>
     </div>
   );
-};
-
-const styles = {
-  image: {
-    width: "100%",
-    height: "400px",
-    objectFit: "cover",
-    cursor: "pointer",
-  },
-  thumbnail: {
-    width: "100px",
-    height: "100px",
-    objectFit: "cover",
-    margin: "5px",
-    cursor: "pointer",
-  },
-  amenityText: {
-    marginLeft: "10px",
-  },
-  bookingCard: {
-    position: "sticky",
-    top: "20px",
-    padding: "20px",
-    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-  },
-  datePicker: {
-    border: "1px solid #d9d9d9",
-    padding: "10px",
-    borderRadius: "5px",
-    marginBottom: "20px",
-  },
-  reserveButton: {
-    backgroundColor: "#ff385c",
-    borderColor: "#ff385c",
-  },
 };
 
 export default PropertyDetails;

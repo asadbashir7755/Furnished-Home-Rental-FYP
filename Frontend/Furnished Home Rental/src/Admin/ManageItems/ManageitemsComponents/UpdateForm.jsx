@@ -19,9 +19,117 @@ const UpdateForm = ({ visible, onCancel = () => {}, onUpdate }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    console.log("Item in UpdateForm:", item); // Add console log
+    // If item is undefined, do not set formData
     if (item) {
-      setFormData(item);
+      console.log("Initial item data:", item);
+      console.log("Complete item object:", JSON.stringify(item, null, 2));
+      
+      // Check how media files are stored in your database
+      if (item.mediaFiles) {
+        console.log("Raw mediaFiles from server:", item.mediaFiles);
+        
+        // Your backend structure from the model: { url: String, type: String }
+        // We need to map this to the structure expected by antd Upload component
+        let mediaFiles = [];
+        try {
+          if (Array.isArray(item.mediaFiles)) {
+            console.log("MediaFiles is an array with length:", item.mediaFiles.length);
+            
+            mediaFiles = item.mediaFiles.map((file, index) => {
+              // Create a file object compatible with Upload component
+              return {
+                uid: `-${index}`,
+                name: file.url.split('/').pop() || `file-${index}.jpg`,
+                status: 'done',
+                url: file.url,
+                type: file.type === 'image' ? 'image/jpeg' : 'video/mp4',
+              };
+            });
+            
+            console.log("Processed media files:", mediaFiles);
+          } else {
+            console.warn("mediaFiles exists but is not an array:", typeof item.mediaFiles);
+          }
+        } catch (error) {
+          console.error("Error processing mediaFiles:", error);
+        }
+        
+        // Update the formData with processed media files
+        setFormData({
+          ...item,
+          mediaFiles: mediaFiles,
+        });
+      } else {
+        // Try to find media files in other properties
+        console.log("No mediaFiles property found, looking for alternatives");
+        console.log("item.media:", item.media);
+        console.log("item.images:", item.images);
+        console.log("item.photos:", item.photos);
+        
+        // Set mediaFiles from whichever property actually contains your media
+        if (item.media) item.mediaFiles = item.media;
+        else if (item.images) item.mediaFiles = item.images;
+        else if (item.photos) item.mediaFiles = item.photos;
+      }
+      
+      // Ensure mediaFiles is always an array and process it properly
+      let mediaFiles = [];
+      
+      try {
+        if (item.mediaFiles) {
+          // If it's a string (like a JSON string), try to parse it
+          if (typeof item.mediaFiles === 'string') {
+            try {
+              const parsedFiles = JSON.parse(item.mediaFiles);
+              console.log("Parsed media files from string:", parsedFiles);
+              if (Array.isArray(parsedFiles)) {
+                item.mediaFiles = parsedFiles;
+              }
+            } catch (e) {
+              console.error("Error parsing mediaFiles string:", e);
+            }
+          }
+          
+          // Now process the array (or what should be an array)
+          if (Array.isArray(item.mediaFiles) && item.mediaFiles.length > 0) {
+            console.log("Processing mediaFiles array with", item.mediaFiles.length, "items");
+            
+            // Log the first item to see its structure
+            if (item.mediaFiles[0]) {
+              console.log("First media file structure:", item.mediaFiles[0]);
+              console.log("First media file properties:", Object.keys(item.mediaFiles[0]));
+            }
+            
+            mediaFiles = item.mediaFiles.map((file, index) => {
+              // Create a valid file object for Ant Design's Upload
+              const fileObj = {
+                uid: file._id || file.uid || `-${index}`,
+                name: file.name || file.filename || `file-${index}.jpg`,
+                status: 'done',
+                url: file.url || file.path || (typeof file === 'string' ? file : undefined),
+                type: file.type || file.contentType || 
+                      (file.url && file.url.match(/\.(mp4|mov|avi)$/i) ? 'video/mp4' : 'image/jpeg')
+              };
+              
+              console.log(`Processed file ${index}:`, fileObj);
+              return fileObj;
+            });
+          } else {
+            console.warn("mediaFiles is not an array or is empty:", item.mediaFiles);
+          }
+        } else {
+          console.warn("No mediaFiles property found in item");
+        }
+      } catch (error) {
+        console.error("Error processing media files:", error);
+      }
+      
+      console.log("Final processed media files for form:", mediaFiles);
+      
+      setFormData({
+        ...item,
+        mediaFiles: mediaFiles,
+      });
       console.log("item is : ", item);
     }
   }, [item, setFormData]);
@@ -31,6 +139,25 @@ const UpdateForm = ({ visible, onCancel = () => {}, onUpdate }) => {
     navigate(-1); // Navigate back to the previous page
   };
 
+  // Track if media files have been changed by user
+  const [mediaFilesChanged, setMediaFilesChanged] = useState(false);
+  
+  // Log whenever activeTab changes to see if we're visiting the media tab
+  useEffect(() => {
+    console.log(`Tab changed to: ${activeTab}`);
+    if (activeTab === "media") {
+      console.log("Current mediaFiles:", formData.mediaFiles);
+      console.log("mediaFilesChanged state:", mediaFilesChanged);
+    }
+  }, [activeTab, formData.mediaFiles, mediaFilesChanged]);
+
+  // Reset mediaFilesChanged when component unmounts
+  useEffect(() => {
+    return () => {
+      setMediaFilesChanged(false);
+    };
+  }, []);
+
   const handleSubmit = async () => {
     // Validate all fields before submitting
     if (!formData.description || !formData.personCapacity || !formData.propertyType || !formData.roomType || !formData.numBedrooms || !formData.numBeds || !formData.numBathrooms || !formData.bathroomType || !formData.numGuestBathrooms || !formData.address?.publicAddress || !formData.address?.country || !formData.address?.state || !formData.address?.city || !formData.address?.street || !formData.address?.zipCode || !formData.amenities || formData.amenities.length === 0 || !formData.pricing?.pricePerNight || !formData.pricing?.pricePerWeek || !formData.pricing?.pricePerMonth) {
@@ -38,16 +165,72 @@ const UpdateForm = ({ visible, onCancel = () => {}, onUpdate }) => {
       return;
     }
 
+    console.log("Before submission - mediaFiles:", formData.mediaFiles);
+    console.log("Before submission - mediaFiles details:", formData.mediaFiles?.map(f => ({
+      name: f.name,
+      hasUrl: !!f.url, 
+      hasOriginFileObj: !!f.originFileObj,
+      type: f.type
+    })));
+    console.log("Before submission - mediaFilesChanged:", mediaFilesChanged);
+
     setIsSubmitting(true);
     try {
+      // Create a completely new object instead of spreading formData
+      // This ensures mediaFiles won't be included unless we explicitly add it
       const updatedFormData = {
-        ...formData,
-        mediaFiles: formData.mediaFiles.map(file => file.originFileObj ? file.originFileObj : file)
+        _id: formData._id,
+        listingName: formData.listingName,
+        externalListingName: formData.externalListingName,
+        tags: formData.tags,
+        description: formData.description,
+        propertyType: formData.propertyType,
+        roomType: formData.roomType,
+        personCapacity: formData.personCapacity,
+        numBedrooms: formData.numBedrooms,
+        numBeds: formData.numBeds,
+        numBathrooms: formData.numBathrooms,
+        bathroomType: formData.bathroomType,
+        numGuestBathrooms: formData.numGuestBathrooms,
+        address: formData.address,
+        pricing: formData.pricing,
+        amenities: formData.amenities,
+        status: formData.status,
       };
-      console.log("form data in update form is : ", updatedFormData);
+      
+      // Handle mediaFiles - the key change is here
+      if (mediaFilesChanged) {
+        // If media files were changed by user, send the new files
+        console.log("Including modified mediaFiles in request");
+        if (formData.mediaFiles && formData.mediaFiles.length > 0) {
+          updatedFormData.mediaFiles = formData.mediaFiles.map(file => file.originFileObj ? file.originFileObj : file);
+        } else {
+          console.log("Warning: mediaFiles is empty after user changes");
+          updatedFormData.mediaFiles = [];
+        }
+      } else if (item && item.mediaFiles) {
+        // If media files weren't changed, send the original mediaFiles from the item
+        // This prevents the server from emptying the mediaFiles
+        console.log("Including original mediaFiles to prevent them from being cleared");
+        updatedFormData.mediaFiles = item.mediaFiles;
+      }
+      
+      console.log("Final request payload:", updatedFormData);
+      console.log("mediaFiles included in payload:", 'mediaFiles' in updatedFormData);
+      
       const result = await updateItem(formData._id, updatedFormData);
       console.log("result is : ", result);
+      // If mediaFilesChanged is true but mediaFiles is empty, warn the user
+      if (mediaFilesChanged && (!formData.mediaFiles || formData.mediaFiles.length === 0)) {
+        const confirmEmpty = window.confirm(
+          "You are about to update this item with no media files. This will remove all existing images. Continue?"
+        );
+        if (!confirmEmpty) {
+          return;
+        }
+      }
       if (result.message) {
+        setMediaFilesChanged(false);
         message.success(result.message);
         navigate(-1); // Navigate back to the previous page
       } else {
@@ -99,11 +282,39 @@ const UpdateForm = ({ visible, onCancel = () => {}, onUpdate }) => {
 
   const MediaForm = ({ readOnly = false }) => {
     const { formData, updateFormData, setActiveTab } = useFormContext();
+    
+    // Add fileList state to control the Upload component
+    const [fileList, setFileList] = useState([]);
+
+    // Initialize fileList when formData.mediaFiles changes
+    useEffect(() => {
+      console.log("MediaForm: formData.mediaFiles changed:", formData.mediaFiles);
+      if (formData.mediaFiles && formData.mediaFiles.length > 0) {
+        setFileList(formData.mediaFiles);
+      }
+    }, [formData.mediaFiles]);
+  
+    // Add logging for mediaFiles in the MediaForm
+    useEffect(() => {
+      console.log("MediaForm rendered with files:", formData.mediaFiles);
+      console.log("MediaFiles type:", Array.isArray(formData.mediaFiles) ? "Array" : typeof formData.mediaFiles);
+      console.log("MediaFiles length:", formData.mediaFiles?.length || 0);
+      
+      // Log each file's properties to debug issues
+      if (Array.isArray(formData.mediaFiles) && formData.mediaFiles.length > 0) {
+        formData.mediaFiles.forEach((file, idx) => {
+          console.log(`File ${idx} properties:`, Object.keys(file));
+          console.log(`File ${idx} has URL:`, !!file.url);
+          console.log(`File ${idx} has originFileObj:`, !!file.originFileObj);
+        });
+      }
+    }, [formData.mediaFiles]);
   
     const uploadProps = {
       name: "file",
       multiple: true,
       accept: "image/png, image/jpeg, image/jpg, video/mp4",
+      fileList: fileList, // Control the file list
       beforeUpload: (file) => {
         const isImage = file.type.startsWith("image/");
         const isVideo = file.type === "video/mp4";
@@ -127,6 +338,9 @@ const UpdateForm = ({ visible, onCancel = () => {}, onUpdate }) => {
         return true;
       },
       onChange(info) {
+        console.log("Upload onChange called with fileList:", info.fileList);
+        setFileList(info.fileList); // Update local fileList state
+        
         const uniqueFiles = [];
         const fileNames = new Set();
         info.fileList.forEach((file) => {
@@ -135,7 +349,22 @@ const UpdateForm = ({ visible, onCancel = () => {}, onUpdate }) => {
             fileNames.add(file.name);
           }
         });
-        updateFormData({ mediaFiles: uniqueFiles });
+        
+        // Only update mediaFiles if user actually uploads or removes files
+        if (info.fileList.length > 0) {
+          console.log("Updating mediaFiles with new uploads:", uniqueFiles);
+          updateFormData({ mediaFiles: uniqueFiles });
+          setMediaFilesChanged(true);
+          console.log("Set mediaFilesChanged to true");
+        } else if (info.fileList.length === 0 && formData.mediaFiles.length > 0) {
+          // User cleared all files
+          console.log("User cleared all files, setting empty mediaFiles");
+          updateFormData({ mediaFiles: [] });
+          setMediaFilesChanged(true);
+          console.log("Set mediaFilesChanged to true");
+        } else {
+          console.log("No change to mediaFiles");
+        }
       },
       customRequest({ onSuccess }) {
         setTimeout(() => {
@@ -172,8 +401,12 @@ const UpdateForm = ({ visible, onCancel = () => {}, onUpdate }) => {
               </Dragger>
             )}
             <div className="uploaded-files" style={{ display: 'flex', flexWrap: 'wrap' }}>
-              {formData.mediaFiles && formData.mediaFiles.map((file) => (
-                <div key={file.uid} className="uploaded-file" style={{ marginRight: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              {formData.mediaFiles && formData.mediaFiles.map((file, idx) => (
+                <div
+                  key={file.uid || file.name || idx} // Ensure unique key for each file
+                  className="uploaded-file"
+                  style={{ marginRight: '10px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+                >
                   {file.type && file.type.startsWith("image/") ? (
                     file.originFileObj ? (
                       <img src={URL.createObjectURL(file.originFileObj)} alt={file.name} style={{ width: '100px', height: '100px', objectFit: 'cover' }} />
@@ -222,9 +455,37 @@ const UpdateForm = ({ visible, onCancel = () => {}, onUpdate }) => {
       "Elevator", "Wheelchair Accessible", "Pet Friendly", "Security System"
     ];
   
+    // Handle checkbox changes for both groups
     const handleCheckboxChange = (checkedValues) => {
+      console.log("Amenities updated:", checkedValues);
       updateFormData({ amenities: checkedValues });
     };
+
+    // Convert amenities to an array of individual strings
+    let currentAmenities = [];
+    if (formData.amenities) {
+      if (Array.isArray(formData.amenities)) {
+        // If it's an array with a single comma-separated string, split it
+        if (formData.amenities.length === 1 && typeof formData.amenities[0] === 'string' && formData.amenities[0].includes(',')) {
+          currentAmenities = formData.amenities[0].split(',').map(item => item.trim());
+        } 
+        // If it's already an array of individual strings, use it as is
+        else {
+          currentAmenities = formData.amenities;
+        }
+      } 
+      // If it's a comma-separated string, split it
+      else if (typeof formData.amenities === 'string') {
+        currentAmenities = formData.amenities.split(',').map(item => item.trim());
+      }
+    }
+    
+    // Remove duplicates
+    currentAmenities = [...new Set(currentAmenities)];
+    
+    console.log("Current amenities type:", typeof formData.amenities);
+    console.log("Current amenities value:", formData.amenities);
+    console.log("Processed amenities for checkboxes:", currentAmenities);
   
     return (
       <Form layout="vertical" className="amenities-form full-width" style={{ margin: 0 }}>
@@ -233,16 +494,16 @@ const UpdateForm = ({ visible, onCancel = () => {}, onUpdate }) => {
             <h3 className="amenities-title">Common Amenities</h3>
             <Checkbox.Group
               options={commonAmenities}
-              value={formData?.amenities || []}
-              onChange={(checkedValues) => handleCheckboxChange([...new Set([...formData.amenities, ...checkedValues])])}
+              value={currentAmenities}
+              onChange={handleCheckboxChange}
               className="amenities-checkbox-group"
               disabled={readOnly}
             />
             <h3 className="amenities-title">Additional Amenities</h3>
             <Checkbox.Group
               options={additionalAmenities}
-              value={formData?.amenities || []}
-              onChange={(checkedValues) => handleCheckboxChange([...new Set([...formData.amenities, ...checkedValues])])}
+              value={currentAmenities}
+              onChange={handleCheckboxChange}
               className="amenities-checkbox-group"
               disabled={readOnly}
             />
@@ -501,5 +762,7 @@ const UpdateForm = ({ visible, onCancel = () => {}, onUpdate }) => {
     </Layout>
   );
 };
+
+
 
 export default UpdateForm;
