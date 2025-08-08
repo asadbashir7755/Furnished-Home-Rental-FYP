@@ -1,6 +1,7 @@
 const API_BASE_URL = process.env.API_BASE_URL || '/api'; // Default to '/api' if not defined
 
 const API_ENDPOINTS = {
+    base: API_BASE_URL,
     users: {
         base: `${API_BASE_URL}/users`,
         login: `${API_BASE_URL}/users/login`,

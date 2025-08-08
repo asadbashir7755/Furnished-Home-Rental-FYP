@@ -56,6 +56,8 @@ const startServer = async () => {
   app.use("/api", require("./routes/reservations")); // Stripe checkout endpoints
   app.use("/api", require("./routes/reservationRoutes")); // Reservation CRUD endpoints
   app.use("/api", require("./routes/contacmessagesroutes"));
+  app.use("/api", require("./routes/reviewroutes")); // <-- Add this line for reviews API
+  app.use(API_ENDPOINTS.base || "/api", require("./CHATBOT/chatbotroutes"));
 
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

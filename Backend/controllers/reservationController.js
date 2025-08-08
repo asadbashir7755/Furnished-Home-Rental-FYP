@@ -7,10 +7,33 @@ console.log("Loaded reservationController.js");
 // Utility: Update completed reservations
 async function updateCompletedReservations() {
     const now = new Date();
+    // Find reservations that will be marked as completed
+    const reservationsToComplete = await Reservation.find(
+        { 'dates.endDate': { $lt: now }, status: 'booked' }
+    );
+
+    // Update their status to completed
     await Reservation.updateMany(
         { 'dates.endDate': { $lt: now }, status: 'booked' },
         { $set: { status: 'completed' } }
     );
+
+    // Unblock dates for these reservations
+    for (const reservation of reservationsToComplete) {
+        if (
+            reservation.propertyId &&
+            reservation.dates &&
+            reservation.dates.startDate &&
+            reservation.dates.endDate
+        ) {
+            const result = await BlockedDate.deleteMany({
+                propertyId: reservation.propertyId,
+                startDate: reservation.dates.startDate,
+                endDate: reservation.dates.endDate
+            });
+            console.log(`Dates unblocked after status changed to completed for property ${reservation.propertyId}. Count: ${result.deletedCount}`);
+        }
+    }
 }
 
 // Get all reservations (admin endpoint)
@@ -130,6 +153,56 @@ exports.updateReservationStatus = async (req, res) => {
 // Cancel a reservation
 exports.cancelReservation = async (req, res) => {
     console.log("cancelReservation called");
-    res.status(501).json({ message: "Not implemented" });
+    try {
+        const reservationId = req.params.id;
+        const userId = req.user._id || req.user.userId;
+
+        if (!reservationId || !userId) {
+            return res.status(400).json({ message: "reservationId and user authentication required." });
+        }
+
+        // Find the reservation by _id and user.id, then update status
+        const reservation = await Reservation.findOneAndUpdate(
+            { _id: reservationId, 'user.id': userId },
+            { $set: { status: 'canceled' } },
+            { new: true }
+        );
+
+        if (!reservation) {
+            return res.status(404).json({ message: "Reservation not found for this user." });
+        }
+
+        // Remove blocked dates for this reservation
+        if (reservation.propertyId && reservation.dates && reservation.dates.startDate && reservation.dates.endDate) {
+            await BlockedDate.deleteMany({
+                propertyId: reservation.propertyId,
+                startDate: reservation.dates.startDate,
+                endDate: reservation.dates.endDate
+            });
+        }
+
+        res.status(200).json({ message: "Reservation canceled successfully.", reservation });
+    } catch (error) {
+        console.error("Error canceling reservation:", error);
+        res.status(500).json({ message: error.message });
+    }
 };
-        
+
+// Check if user has any reservations (for /user/reservations/check)
+exports.checkUserReservations = async (req, res) => {
+    try {
+        console.log("control in checkuserreservations");
+        if (!req.user || !(req.user._id || req.user.userId)) {
+            console.error("req.user or user id is undefined:", req.user);
+            return res.status(401).json({ message: "Unauthorized: user info missing in request." });
+        }
+        const userId = req.user._id || req.user.userId;
+        console.log("user id in reservations is:", userId);
+
+        const reservations = await Reservation.find({ 'user.id': userId });
+        res.status(200).json({ hasReservations: reservations.length > 0, reservations });
+    } catch (error) {
+        console.error('Error checking user reservations:', error);
+        res.status(500).json({ message: error.message });
+    }
+};

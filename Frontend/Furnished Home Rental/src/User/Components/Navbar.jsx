@@ -1,15 +1,37 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import '../../Styles/Navbar.css';
 import logo from "../../assets/logo3.png";
 import { FaBars, FaTimes } from 'react-icons/fa';
 import Sidebar from './Sidebar';
 import { UserContext } from '../Context/UserContext';
+import { fetchUserReservations } from './API/userreservations';
 
 const Navbar = () => {
   const [sidebar, setSidebar] = useState(false);
+  const [hasReservations, setHasReservations] = useState(false);
   const { user } = useContext(UserContext) || {};
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let mounted = true;
+    if (user) {
+      fetchUserReservations()
+        .then(data => {
+          // Handle both array and object with reservations property
+          const resArr = Array.isArray(data)
+            ? data
+            : (Array.isArray(data?.reservations) ? data.reservations : []);
+          if (mounted) setHasReservations(resArr.length > 0);
+        })
+        .catch(() => {
+          if (mounted) setHasReservations(false);
+        });
+    } else {
+      setHasReservations(false);
+    }
+    return () => { mounted = false; };
+  }, [user]);
 
   const showSidebar = () => setSidebar(!sidebar);
 
@@ -19,6 +41,10 @@ const Navbar = () => {
 
   const handleManageProfileClick = () => {
     navigate('/profile');
+  };
+
+  const handleManageReservationsClick = () => {
+    navigate('/userreservations');
   };
 
   return (
@@ -48,9 +74,16 @@ const Navbar = () => {
               <NavLink className="nav-link" to="/contactus" activeclassname="active">Contact Us</NavLink>
             </li>
             {user ? (
-              <li className="nav-item">
-                <button className="btn btn-primary" onClick={handleManageProfileClick}>Manage Profile</button>
-              </li>
+              <>
+                <li className="nav-item">
+                  <button className="btn btn-primary" onClick={handleManageProfileClick}>Manage Profile</button>
+                </li>
+                {hasReservations && (
+                  <li className="nav-item">
+                    <button className="btn btn-secondary" onClick={handleManageReservationsClick}>Manage Reservations</button>
+                  </li>
+                )}
+              </>
             ) : (
               <li className="nav-item">
                 <button className="btn btn-primary" onClick={handleLoginClick}>Login</button>

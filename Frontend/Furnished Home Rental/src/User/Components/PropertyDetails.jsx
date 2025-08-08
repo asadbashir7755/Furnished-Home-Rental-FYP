@@ -1,17 +1,19 @@
 import React, { useState, useMemo, useRef, useEffect, useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { DatePicker, message, Modal, Rate, Avatar, Tooltip, Divider } from "antd";
+import { DatePicker, message, Modal, Rate, Avatar, Tooltip, Divider, Input, Button, Form } from "antd";
 import {
   FaWifi, FaParking, FaTshirt, FaTv, FaUtensils, FaMugHot, FaBath, FaBed, FaDoorOpen, FaHome, FaToilet, FaMapMarkerAlt, FaUsers, FaCheck, FaStar, FaMapMarker, FaArrowLeft, FaArrowRight
 } from "react-icons/fa";
 import { UserOutlined } from "@ant-design/icons";
 import { createCheckoutSession } from "./API/checkout";
+import { submitReview, getPropertyReviews } from './API/reviews';
 import "../../Styles/property_details.css";
 import dayjs from "dayjs";
 import { UserContext } from '../Context/UserContext';
 import { Modal as AntModal } from "antd";
 
 const { RangePicker } = DatePicker;
+const { TextArea } = Input;
 
 const amenitiesIcons = {
   Wifi: <FaWifi />,
@@ -41,6 +43,11 @@ const PropertyDetails = () => {
   const [personCapacity, setPersonCapacity] = useState(property.personCapacity || 1);
   const [confirmOverCapacity, setConfirmOverCapacity] = useState(false);
   const [applyExtraCharge, setApplyExtraCharge] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [reviewForm] = Form.useForm();
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [hasPromptedReview, setHasPromptedReview] = useState(false);
 
   const nights = useMemo(() => {
     // Defensive: ensure dates is an array and has two valid values
@@ -166,7 +173,59 @@ const PropertyDetails = () => {
     }
   };
 
-  const reviews = property.reviews || [];
+  // Fetch reviews when component mounts
+  useEffect(() => {
+    const fetchReviews = async () => {
+      if (property?._id) {
+        try {
+          const data = await getPropertyReviews(property._id);
+          setReviews(data.reviews || []);
+        } catch (err) {
+          console.error("Error fetching reviews:", err);
+        }
+      }
+    };
+    fetchReviews();
+  }, [property?._id]);
+
+  // Handle review submission
+  const handleReviewSubmit = async (values) => {
+    if (!user) {
+      message.info("Please login to submit a review.");
+      navigate("/login");
+      return;
+    }
+
+    setSubmittingReview(true);
+    try {
+      const reviewData = {
+        propertyId: property._id,
+        rating: values.rating,
+        comment: values.comment,
+        userId: user._id,
+        userName: user.name
+      };
+      
+      await submitReview(reviewData);
+      message.success("Review submitted successfully!");
+      
+      // Update reviews list with new review
+      setReviews([...reviews, {...reviewData, createdAt: new Date().toISOString()}]);
+      
+      // Reset form
+      reviewForm.resetFields();
+      setShowReviewForm(false);
+    } catch (err) {
+      message.error("Failed to submit review. Please try again.");
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  // Calculate average rating
+  const averageRating = reviews.length > 0 
+    ? (reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length).toFixed(1) 
+    : 0;
 
   const goToPrevious = () => {
     setCurrentImageIndex((prevIndex) => (prevIndex === 0 ? property.mediaFiles.length - 1 : prevIndex - 1));
@@ -238,6 +297,19 @@ const PropertyDetails = () => {
     }
     return false;
   };
+
+  // Add a timer to show review form after 30 seconds
+  useEffect(() => {
+    // Only show the prompt if user is logged in, hasn't been prompted yet, and reviews are loaded
+    if (user && !hasPromptedReview && reviews !== undefined) {
+      const timer = setTimeout(() => {
+        setShowReviewForm(true);
+        setHasPromptedReview(true);
+      }, 30000); // 30 seconds
+      
+      return () => clearTimeout(timer); // Cleanup timer on unmount
+    }
+  }, [user, hasPromptedReview, reviews]);
 
   return (
     <div className="container my-5">
@@ -327,10 +399,91 @@ const PropertyDetails = () => {
           </div>
 
           <div className="reviews-section professional-card">
-            <h3 className="section-heading">Reviews</h3>
-            <div className="no-reviews">
-              <FaStar className="icon" /> No reviews yet
-            </div>
+            <h3 className="section-heading">
+              Reviews
+              {reviews.length > 0 && (
+                <span className="ml-2">
+                  <FaStar className="icon" style={{ color: "#fadb14" }} /> {averageRating} · {reviews.length} review{reviews.length !== 1 ? 's' : ''}
+                </span>
+              )}
+            </h3>
+            
+            {/* Keep the button to write a review, but modify to use modal */}
+            {user && (
+              <Button 
+                type="primary" 
+                onClick={() => setShowReviewForm(true)}
+                className="mb-4"
+              >
+                Write a Review
+              </Button>
+            )}
+
+            {/* Add this to show a modal instead of inline form */}
+            <Modal
+              title="Share Your Experience"
+              open={showReviewForm}
+              onCancel={() => setShowReviewForm(false)}
+              footer={null}
+              centered
+            >
+              <div className="review-form-container">
+                <Form
+                  form={reviewForm}
+                  onFinish={handleReviewSubmit}
+                  layout="vertical"
+                >
+                  <Form.Item
+                    name="rating"
+                    label="Rating"
+                    rules={[{ required: true, message: 'Please rate your experience' }]}
+                  >
+                    <Rate allowHalf />
+                  </Form.Item>
+                  <Form.Item
+                    name="comment"
+                    label="Your Review"
+                    rules={[{ required: true, message: 'Please share your experience' }]}
+                  >
+                    <TextArea rows={4} placeholder="Share your experience with this property" />
+                  </Form.Item>
+                  <Form.Item>
+                    <Button type="primary" htmlType="submit" loading={submittingReview}>
+                      Submit Review
+                    </Button>
+                    <Button 
+                      onClick={() => setShowReviewForm(false)} 
+                      style={{ marginLeft: 8 }}
+                    >
+                      Cancel
+                    </Button>
+                  </Form.Item>
+                </Form>
+              </div>
+            </Modal>
+
+            {reviews.length > 0 ? (
+              <div className="reviews-list">
+                {reviews.map((review, index) => (
+                  <div key={index} className="review-item mb-4">
+                    <div className="review-header d-flex align-items-center mb-2">
+                      <Avatar size={40} icon={<UserOutlined />} />
+                      <div className="ml-3">
+                        <div className="reviewer-name">{review.userName}</div>
+                        <div className="review-date">{new Date(review.createdAt).toLocaleDateString()}</div>
+                      </div>
+                    </div>
+                    <Rate disabled allowHalf value={review.rating} />
+                    <p className="review-comment mt-2">{review.comment}</p>
+                    {index < reviews.length - 1 && <Divider style={{ margin: "16px 0" }} />}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="no-reviews">
+                <FaStar className="icon" /> No reviews yet
+              </div>
+            )}
           </div>
         </div>
 

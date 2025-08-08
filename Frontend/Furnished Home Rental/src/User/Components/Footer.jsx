@@ -25,13 +25,13 @@ const CustomFooter = () => {
         </Col>
         <Col xs={24} md={8} style={styles.col}>
           <h5>Contact Us</h5>
-          <p>Email: info@ezmine.com</p>
-          <p>Phone: +123 456 7890</p>
+          <p>Email: asadbashir2229526@gmail.com</p>
+          <p>Phone: +923400569133</p>
         </Col>
       </Row>
       <Row style={styles.footerBottom}>
         <Col span={24} style={styles.textCenter}>
-          <p>© 2025 EZMINE. All Rights Reserved.</p>
+          <p>© 2025 FurnsishedHomeRental. All Rights Reserved.</p>
         </Col>
       </Row>
     </Footer>

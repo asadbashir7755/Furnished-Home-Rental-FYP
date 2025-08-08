@@ -309,6 +309,72 @@
   line-height: 1.6;
 }
 
+/* Add these placeholder styles to your existing CSS file */
+
+.placeholder-card {
+  animation: pulse 1.5s infinite alternate;
+}
+
+.placeholder-image {
+  width: 100%;
+  height: 200px;
+  background-color: #e0e0e0;
+  border-radius: 8px 8px 0 0;
+}
+
+.placeholder-badge {
+  width: 80px;
+  height: 24px;
+  background-color: #e0e0e0;
+}
+
+.placeholder-title {
+  width: 80%;
+  height: 24px;
+  background-color: #e0e0e0;
+  margin-bottom: 10px;
+  border-radius: 4px;
+}
+
+.placeholder-location {
+  width: 60%;
+  height: 16px;
+  background-color: #e0e0e0;
+  margin-bottom: 10px;
+  border-radius: 4px;
+}
+
+.placeholder-description {
+  width: 100%;
+  height: 60px;
+  background-color: #e0e0e0;
+  margin-bottom: 15px;
+  border-radius: 4px;
+}
+
+.placeholder-price {
+  width: 80px;
+  height: 24px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+}
+
+.placeholder-button {
+  width: 100px;
+  height: 36px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 @media (max-width: 900px) {
   .featured-grid {
     grid-template-columns: 1fr;

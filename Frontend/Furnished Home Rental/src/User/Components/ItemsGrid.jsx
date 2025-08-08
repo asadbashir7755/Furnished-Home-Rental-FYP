@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { PropertyContext } from "../Context/HomeCardDataContext";
 import { fetchProperties } from "../Components/API/HomeCardData";
 import "../../Styles/ItemsGrid.css";
+import Chatbot from "../../CHATBOT/chatbot";
 
 const ItemsGrid = () => {
   const { properties, setProperties, loading, setLoading } = useContext(PropertyContext);
@@ -168,6 +169,7 @@ const ItemsGrid = () => {
       {renderPropertySection("Featured Properties", groupedProperties.featured, "No featured properties", "featured-section")}
       {renderPropertySection("New Properties", groupedProperties.new, "No new properties", "new-section")}
       {renderPropertySection("Explore Our Collections", groupedProperties.others, "No properties available", "all-section")}
+      <Chatbot />
     </div>
   );
 };

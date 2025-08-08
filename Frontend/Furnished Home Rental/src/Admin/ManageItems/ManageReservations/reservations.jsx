@@ -60,7 +60,7 @@ function getTimeRemaining(endDate) {
 const statusTabs = [
   { key: "all", label: "All" },
   { key: "current", label: "Current" },
-  { key: "old", label: "Old" },
+  { key: "completed", label: "Completed" },
   { key: "cancelled", label: "Cancelled" },
   { key: "pending", label: "Pending" },
 ];
@@ -156,16 +156,6 @@ const ReservationsPage = () => {
   }
   function cancelledReservations() {
     return reservations.filter((res) => res.status === "cancelled");
-  }
-  function oldReservations() {
-    const now = new Date();
-    return reservations.filter((res) => {
-      const end = new Date(res.dates?.endDate || res.checkOutDate);
-      return (
-        res.status === "confirmed" &&
-        end < now
-      );
-    });
   }
   function pendingReservations() {
     return reservations.filter((res) => res.status === "pending");
@@ -441,14 +431,10 @@ const ReservationsPage = () => {
         return confirmedReservations();
       case "current":
         return currentReservations();
-      case "upcoming":
-        return upcomingReservations();
       case "completed":
         return completedReservations();
       case "cancelled":
         return cancelledReservations();
-      case "old":
-        return oldReservations();
       default:
         return allReservations();
     }
@@ -531,5 +517,7 @@ const ReservationsPage = () => {
     </Layout>
   );
 };
+
+
 
 export default ReservationsPage;

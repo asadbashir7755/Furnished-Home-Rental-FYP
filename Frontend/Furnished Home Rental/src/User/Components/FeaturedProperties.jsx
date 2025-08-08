@@ -28,14 +28,26 @@ const FeaturedProperties = () => {
     loadFeaturedProperties();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="featured-loading">
-        <div className="spinner"></div>
-        <p>Loading featured properties...</p>
+  // Render placeholder cards during loading
+  const renderPlaceholderCards = () => {
+    return Array(6).fill(0).map((_, index) => (
+      <div key={`placeholder-${index}`} className="featured-property-card placeholder-card">
+        <div className="featured-image-container">
+          <div className="placeholder-image"></div>
+          <div className="featured-badge placeholder-badge"></div>
+        </div>
+        <div className="featured-property-info">
+          <div className="placeholder-title"></div>
+          <div className="placeholder-location"></div>
+          <div className="placeholder-description"></div>
+          <div className="featured-price-row">
+            <div className="placeholder-price"></div>
+            <div className="placeholder-button"></div>
+          </div>
+        </div>
       </div>
-    );
-  }
+    ));
+  };
 
   return (
     <div className="featured-properties-container">
@@ -47,7 +59,11 @@ const FeaturedProperties = () => {
         <p>Our handpicked selection of premium properties</p>
       </div>
 
-      {properties.length === 0 ? (
+      {loading ? (
+        <div className="featured-grid">
+          {renderPlaceholderCards()}
+        </div>
+      ) : properties.length === 0 ? (
         <div className="no-properties">
           <h3>No featured properties available at this time</h3>
           <p>Please check back later or browse our other listings</p>
@@ -118,5 +134,6 @@ const FeaturedProperties = () => {
     </div>
   );
 };
+
 
 export default FeaturedProperties;

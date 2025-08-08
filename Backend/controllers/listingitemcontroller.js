@@ -89,7 +89,9 @@ exports.updateItem = async (req, res) => {
             console.log("No new media files, keeping existing ones");
         }
 
-        console.log("Final update data:", Object.keys(updateData));
+        // Save previous item for comparison
+        const prevItem = await ListingItem.findById(req.params.id);
+
         const updatedItem = await ListingItem.findByIdAndUpdate(
             req.params.id,
             updateData,
@@ -97,6 +99,14 @@ exports.updateItem = async (req, res) => {
         );
         
         if (!updatedItem) return res.status(404).json({ message: "Item not found" });
+
+        // If status changed to "canceled", remove blocked dates
+        if (prevItem && updateData.status && updateData.status.toLowerCase() === "canceled") {
+            // Remove all blocked dates for this property
+            const result = await BlockedDate.deleteMany({ propertyId: req.params.id });
+            console.log(`Dates unblocked after status changed to cancelled for property ${req.params.id}. Count: ${result.deletedCount}`);
+        }
+
         res.status(200).json({ message: "Item updated successfully", item: updatedItem });
     } catch (error) {
         console.error("Error updating item:", error);
