@@ -38,62 +38,79 @@ Key differentiators include **AI-powered recommendations**, **real-time availabi
 
 ---
 
-## Image Placeholders
+## Platform Screenshots & Features Walkthrough
 
-1. **Login Page**
-    *\[Insert: login.png]*
-    ![Login Page](website-images/1.login.PNG)
-2. **Signup Page**
-    *\[Insert: signup.png]*
-    ![Signup Page](website-images/1.signup.png)
+Below are key screenshots from the platform, each illustrating a core feature or interface. Descriptions are provided to guide you through the user and admin experience.
 
-3. **Chat Assistant - Developer Info**
-    *\[Insert: chat-assistant-2.png]*
-    ![Chat Assistant - Available Homes Info](website-images/4.1.chatbot.PNG)
+1. **Login Page**  
+   The entry point for all users. Secure authentication ensures only registered users can access the platform.
+   
+   ![Login Page](website-images/1.login.PNG)
 
-4. **Chat Assistant - Feature Info**
-    *\[Insert: chat-assistant-1.png]*
-    ![Chat Assistant - Feature Info](website-images/4.2.chatbot.PNG)
+2. **Signup Page**  
+   New users can quickly register by providing essential details, enabling access to all platform features.
+   
+   ![Signup Page](website-images/1.signup.png)
 
-5. **New Properties with Chat Assistant**
-    *\[Insert: new-properties-chat.png]*
-    ![New Properties with Chat Assistant](website-images/4.3.chatbot.PNG)
+3. **Chat Assistant - Developer Info**  
+   The AI-powered chat assistant introduces itself and provides information about the development team and platform capabilities.
+   
+   ![Chat Assistant - Available Homes Info](website-images/4.1.chatbot.PNG)
 
-6. **Featured Properties Page**
-    *\[Insert: featured-properties.png]*
-    ![Featured Properties Page](website-images/5.featuredproperties.png)
-7. **Contact Us Page**
-   *\[Insert: contact-us.png]*
+4. **Chat Assistant - Feature Info**  
+   Users can interact with the chat assistant to learn about platform features, get recommendations, and receive instant support.
+   
+   ![Chat Assistant - Feature Info](website-images/4.2.chatbot.PNG)
+
+5. **New Properties with Chat Assistant**  
+   The chat assistant helps users discover new property listings, making the search process more interactive and efficient.
+   
+   ![New Properties with Chat Assistant](website-images/4.3.chatbot.PNG)
+
+6. **Featured Properties Page**  
+   Highlights premium and recommended properties, allowing users to quickly find top-rated furnished homes.
+   
+   ![Featured Properties Page](website-images/5.featuredproperties.png)
+
+7. **Contact Us Page**  
+   Users can reach out for support, inquiries, or feedback directly through this dedicated contact interface.
+   
    ![Contact Us Page](website-images/7.contactus.png)
-8. **Admin Dashboard**
-   *\[Insert: admin-dashboard.png]*
+
+8. **Admin Dashboard**  
+   The central hub for administrators, providing an overview of platform activity, quick stats, and navigation to management tools.
+   
    ![Admin Dashboard](website-images/8.dashboardhome.PNG)
 
-9. **Manage Users Page**
-   *\[Insert: manage-users.png]*
+9. **Manage Users Page**  
+   Admins can view, edit, or remove user accounts, assign roles, and monitor user activity for security and support.
+   
    ![Manage Users Page](website-images/9.dashboard_manageuser.PNG)
 
-10. **List Items (Manage Items)**
-   *\[Insert: manage-items-amenities.png]*
-   ![Amenities Selection](website-images/10.dashboard_manageitem.png)
+10. **List Items (Manage Items)**  
+    Landlords and admins can add, edit, or remove property listings, including images, pricing, and amenities.
+    
+    ![Amenities Selection](website-images/10.dashboard_manageitem.png)
 
-11. **Listed Properties View**
-   *\[Insert: listed-items-multiple.png]*
-   ![Multiple Properties View](website-images/11.dashboard_listeditems.png)
+11. **Listed Properties View**  
+    Displays all properties currently listed on the platform, with options to filter, sort, and manage each listing.
+    
+    ![Multiple Properties View](website-images/11.dashboard_listeditems.png)
 
-12. **Single Property View (Listed Item)**
-   *\[Insert: listed-items-single.png]*
-   ![Single Property View](website-images/11.dashboard_listeditems2.png)
+12. **Single Property View (Listed Item)**  
+    Detailed view of a single property, showcasing images, amenities, pricing, and booking options.
+    
+    ![Single Property View](website-images/11.dashboard_listeditems2.png)
 
+13. **All Reservations Page**  
+    Admins and landlords can review all bookings, approve or cancel reservations, and monitor occupancy status.
+    
+    ![All Reservations Page](website-images/12.reservations.png)
 
-13. **All Reservations Page**
-   *\[Insert: all-reservations.png]*
-   ![All Reservations Page](website-images/12.reservations.png)
-
-
-14. **Contact Messages Panel**
-   *\[Insert: contact-messages.png]*
-   ![Contact Messages Panel](website-images/13.contactmessages.PNG)
+14. **Contact Messages Panel**  
+    Centralized panel for managing user inquiries and messages, enabling prompt responses and efficient communication.
+    
+    ![Contact Messages Panel](website-images/13.contactmessages.PNG)
 
 ---
 
