@@ -52,62 +52,67 @@ Below are key screenshots from the platform, each illustrating a core feature or
    
    ![Signup Page](website-images/1.signup.png)
 
-3. **Chat Assistant - Developer Info**  
+3. **Home Page**  
+   The main landing page after login or signup. Here, users are greeted with featured listings, search options, and quick access to platform highlights, making it easy to start exploring available furnished homes.
+   
+   ![Home Page](website-images/3.home.png)
+
+4. **Chat Assistant - Developer Info**  
    The AI-powered chat assistant introduces itself and provides information about the development team and platform capabilities.
    
    ![Chat Assistant - Available Homes Info](website-images/4.1.chatbot.PNG)
 
-4. **Chat Assistant - Feature Info**  
+5. **Chat Assistant - Feature Info**  
    Users can interact with the chat assistant to learn about platform features, get recommendations, and receive instant support.
    
    ![Chat Assistant - Feature Info](website-images/4.2.chatbot.PNG)
 
-5. **New Properties with Chat Assistant**  
+6. **New Properties with Chat Assistant**  
    The chat assistant helps users discover new property listings, making the search process more interactive and efficient.
    
    ![New Properties with Chat Assistant](website-images/4.3.chatbot.PNG)
 
-6. **Featured Properties Page**  
+7. **Featured Properties Page**  
    Highlights premium and recommended properties, allowing users to quickly find top-rated furnished homes.
    
    ![Featured Properties Page](website-images/5.featuredproperties.png)
 
-7. **Contact Us Page**  
+8. **Contact Us Page**  
    Users can reach out for support, inquiries, or feedback directly through this dedicated contact interface.
    
    ![Contact Us Page](website-images/7.contactus.png)
 
-8. **Admin Dashboard**  
+9. **Admin Dashboard**  
    The central hub for administrators, providing an overview of platform activity, quick stats, and navigation to management tools.
    
    ![Admin Dashboard](website-images/8.dashboardhome.PNG)
 
-9. **Manage Users Page**  
-   Admins can view, edit, or remove user accounts, assign roles, and monitor user activity for security and support.
-   
-   ![Manage Users Page](website-images/9.dashboard_manageuser.PNG)
+10. **Manage Users Page**  
+    Admins can view, edit, or remove user accounts, assign roles, and monitor user activity for security and support.
+    
+    ![Manage Users Page](website-images/9.dashboard_manageuser.PNG)
 
-10. **List Items (Manage Items)**  
+11. **List Items (Manage Items)**  
     Landlords and admins can add, edit, or remove property listings, including images, pricing, and amenities.
     
     ![Amenities Selection](website-images/10.dashboard_manageitem.png)
 
-11. **Listed Properties View**  
+12. **Listed Properties View**  
     Displays all properties currently listed on the platform, with options to filter, sort, and manage each listing.
     
     ![Multiple Properties View](website-images/11.dashboard_listeditems.png)
 
-12. **Single Property View (Listed Item)**  
+13. **Single Property View (Listed Item)**  
     Detailed view of a single property, showcasing images, amenities, pricing, and booking options.
     
     ![Single Property View](website-images/11.dashboard_listeditems2.png)
 
-13. **All Reservations Page**  
+14. **All Reservations Page**  
     Admins and landlords can review all bookings, approve or cancel reservations, and monitor occupancy status.
     
     ![All Reservations Page](website-images/12.reservations.png)
 
-14. **Contact Messages Panel**  
+15. **Contact Messages Panel**  
     Centralized panel for managing user inquiries and messages, enabling prompt responses and efficient communication.
     
     ![Contact Messages Panel](website-images/13.contactmessages.PNG)
