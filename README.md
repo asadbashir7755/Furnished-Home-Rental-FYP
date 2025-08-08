@@ -40,65 +40,60 @@ Key differentiators include **AI-powered recommendations**, **real-time availabi
 
 ## Image Placeholders
 
-1. **Admin Dashboard**
-   *\[Insert: admin-dashboard.png]*
-   ![Admin Dashboard](website-images/admin-dashboard.png)
-
-2. **Contact Messages Panel**
-   *\[Insert: contact-messages.png]*
-   ![Contact Messages Panel](website-images/contact-messages.png)
-
-3. **All Reservations Page**
-   *\[Insert: all-reservations.png]*
-   ![All Reservations Page](website-images/all-reservations.png)
-
-4. **Single Property View (Listed Item)**
-   *\[Insert: listed-items-single.png]*
-   ![Single Property View](website-images/listed-items-single.png)
-
-5. **Multiple Properties View**
-   *\[Insert: listed-items-multiple.png]*
-   ![Multiple Properties View](website-images/listed-items-multiple.png)
-
-6. **Amenities Selection (Manage Items)**
-   *\[Insert: manage-items-amenities.png]*
-   ![Amenities Selection](website-images/manage-items-amenities.png)
-
-7. **Manage Users Page**
-   *\[Insert: manage-users.png]*
-   ![Manage Users Page](website-images/manage-users.png)
-
-8. **Contact Us Page**
-   *\[Insert: contact-us.png]*
-   ![Contact Us Page](website-images/contact-us.png)
-
-9. **About Us Page**
-   *\[Insert: about-us.png]*
-   ![About Us Page](website-images/about-us.png)
-
-10. **Featured Properties Page**
-    *\[Insert: featured-properties.png]*
-    ![Featured Properties Page](website-images/featured-properties.png)
-
-11. **New Properties with Chat Assistant**
-    *\[Insert: new-properties-chat.png]*
-    ![New Properties with Chat Assistant](website-images/new-properties-chat.png)
-
-12. **Chat Assistant - Feature Info**
-    *\[Insert: chat-assistant-1.png]*
-    ![Chat Assistant - Feature Info](website-images/chat-assistant-1.png)
-
-13. **Chat Assistant - Available Homes Info**
-    *\[Insert: chat-assistant-2.png]*
-    ![Chat Assistant - Available Homes Info](website-images/chat-assistant-2.png)
-
-14. **Signup Page**
-    *\[Insert: signup.png]*
-    ![Signup Page](website-images/signup.png)
-
-15. **Login Page**
+1. **Login Page**
     *\[Insert: login.png]*
-    ![Login Page](website-images/login.png)
+    ![Login Page](website-images/1.login.PNG)
+2. **Signup Page**
+    *\[Insert: signup.png]*
+    ![Signup Page](website-images/1.signup.png)
+
+3. **Chat Assistant - Developer Info**
+    *\[Insert: chat-assistant-2.png]*
+    ![Chat Assistant - Available Homes Info](website-images/4.1.chatbot.PNG)
+
+4. **Chat Assistant - Feature Info**
+    *\[Insert: chat-assistant-1.png]*
+    ![Chat Assistant - Feature Info](website-images/4.2.chatbot.PNG)
+
+5. **New Properties with Chat Assistant**
+    *\[Insert: new-properties-chat.png]*
+    ![New Properties with Chat Assistant](website-images/4.3.chatbot.PNG)
+
+6. **Featured Properties Page**
+    *\[Insert: featured-properties.png]*
+    ![Featured Properties Page](website-images/5.featuredproperties.png)
+7. **Contact Us Page**
+   *\[Insert: contact-us.png]*
+   ![Contact Us Page](website-images/7.contactus.png)
+8. **Admin Dashboard**
+   *\[Insert: admin-dashboard.png]*
+   ![Admin Dashboard](website-images/8.dashboardhome.PNG)
+
+9. **Manage Users Page**
+   *\[Insert: manage-users.png]*
+   ![Manage Users Page](website-images/9.dashboard_manageuser.PNG)
+
+10. **List Items (Manage Items)**
+   *\[Insert: manage-items-amenities.png]*
+   ![Amenities Selection](website-images/10.dashboard_manageitem.png)
+
+11. **Listed Properties View**
+   *\[Insert: listed-items-multiple.png]*
+   ![Multiple Properties View](website-images/11.dashboard_listeditems.png)
+
+12. **Single Property View (Listed Item)**
+   *\[Insert: listed-items-single.png]*
+   ![Single Property View](website-images/11.dashboard_listeditems2.png)
+
+
+13. **All Reservations Page**
+   *\[Insert: all-reservations.png]*
+   ![All Reservations Page](website-images/12.reservations.png)
+
+
+14. **Contact Messages Panel**
+   *\[Insert: contact-messages.png]*
+   ![Contact Messages Panel](website-images/13.contactmessages.PNG)
 
 ---
 
