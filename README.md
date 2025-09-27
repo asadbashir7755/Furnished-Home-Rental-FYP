@@ -14,7 +14,7 @@ Key differentiators include **AI-powered recommendations**, **real-time availabi
 
 * **Created By:** Asad Bashir & Saqib Mumtaz
 * **Lead Developer:** Asad Bashir
-  *Asad is a mid-level MERN Stack developer with strong expertise in building scalable web applications. He is currently a 7th-semester Computer Science student at the University of Azad Jammu and Kashmir, aiming to transition into DevOps engineering. Passionate about delivering high-quality code and user-focused solutions.*
+  *Asad is a mid-level MERN Stack developer with strong expertise in building scalable web applications. He is currently a 8th-semester Computer Science student at the University of Azad Jammu and Kashmir.*
 
 ---
 
@@ -124,32 +124,80 @@ Below are key screenshots from the platform, each illustrating a core feature or
 * **Frontend:** React.js
 * **Backend:** Node.js, Express.js
 * **Database:** MongoDB
-* **AI/ML:** TensorFlow\.js, NLP tools
-* **Payments:** Stripe, PayPal
-* **Admin Panel Framework:** AdminBro or similar React-based framework
+* **AI/ML:** NLP tools
+* **Payments:** Stripe
+* **Admin Panel Framework:** AdminBro
 
 ---
 
 ## Installation & Setup
 
+# Furnished Home Rental – Project Setup Guide
+
+## 1. Clone the Repository
 ```bash
-# Clone repository
-git clone <repo-url>
-
-# Navigate to project folder
-cd furnished-home-rental
-
-# Install dependencies
-npm install
-
-# Set environment variables in .env file
-MONGO_URI=your_mongodb_connection_string
-STRIPE_SECRET_KEY=your_stripe_secret_key
-PAYPAL_CLIENT_ID=your_paypal_client_id
-
-# Start development server
-npm run dev
+git clone https://github.com/asadbashir7755/Furnished-Home-Rental-FYP.git
 ```
+
+## 2. Navigate to the Project Root
+```bash
+cd furnished-home-rental
+```
+
+## 3. Project Structure
+The project has two main parts:
+- **Frontend** → located in `/frontend`
+- **Backend** → located in `/backend`
+
+Navigate accordingly when installing dependencies or running servers.
+
+## 4. Install Dependencies
+Run the following **separately** in both frontend and backend folders:
+```bash
+npm install
+```
+
+## 5. Environment Variables
+Create a `.env` file in both the **backend** and **frontend** directories. These variables are required for the application to run.
+
+### Backend `.env`
+The backend requires the following keys (values must be supplied locally or in production):
+```env
+MONGO_URI=
+JWT_ACCESS_SECRET=
+JWT_REFRESH_SECRET=
+PORT=
+API_BASE_URL=
+EMAIL_USER=
+EMAIL_PASS=
+FRONTEND_URL=
+JWT_RESET_PASSWORD_SECRET=
+STRIPE_PUBLISHABLE_KEY=
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+```
+
+### Frontend `.env`
+The frontend requires the following keys (values must be supplied locally or in production):
+```env
+VITE_STRIPE_PUBLISHABLE_KEY=
+VITE_API_URL=
+```
+
+> **Note:** For security reasons, actual values are not included here. Provide them as appropriate when setting up locally or in production.
+
+## 6. Run the Development Servers
+
+### Backend
+From the `/backend` folder:
+```bash
+nodemon server.js
+```
+
+### Frontend
+From the `/frontend` folder:
+```bash
+npm run dev
 
 ---
 
