@@ -1,5 +1,10 @@
 # The Ultimate Platform for Furnished Home Rentals
 
+Portfolio: **[committodeploy.dev](https://committodeploy.dev)**
+
+> The CI pipeline and container setup for this application live in
+> [fyp-github-actions-cicd](https://github.com/asadbashir7755/fyp-github-actions-cicd).
+
 ---
 
 ## Project Overview
@@ -132,7 +137,7 @@ Below are key screenshots from the platform, each illustrating a core feature or
 
 ## Installation & Setup
 
-# Furnished Home Rental – Project Setup Guide
+# Furnished Home Rental Project Setup Guide
 
 ## 1. Clone the Repository
 ```bash
